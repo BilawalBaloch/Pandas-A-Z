@@ -343,7 +343,7 @@ Output:
 
 Data Manipulation
 Inserting Data
-You can insert new columns into a DataFrame at a specific position.
+You can insert new columns into a DataFrame at a specific position   . 
 
 import pandas as pd
 
@@ -730,7 +730,7 @@ Push to the branch (git push origin feature/your-new-feature).
 
 Open a Pull Request.
 
-
+> 
 
 ---- BB 
 Linkedin: @BILAWAL BASHIR
