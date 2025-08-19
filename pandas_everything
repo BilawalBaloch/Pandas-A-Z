@@ -1,0 +1,530 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# --- 1. Introduction to Pandas & Series/DataFrame Creation ---
+
+# Pandas is built on two primary data structures: Series and DataFrame.
+
+print("--- 1. Pandas Series and DataFrame Creation ---")
+
+# 1.1. Series: A one-dimensional labeled array capable of holding any data type.
+s = pd.Series([1, 3, 5, np.nan, 6, 8])
+print("\n1.1. Example Series:")
+print(s)
+
+# 1.2. DataFrame: A two-dimensional labeled data structure with columns of potentially different types.
+# It's like a spreadsheet or SQL table.
+
+# Creating a DataFrame from a dictionary
+data = {
+    'Name': ['Alice', 'Bob', 'Charlie', 'David', 'Eve'],
+    'Age': [24, 27, 22, 32, 29],
+    'City': ['New York', 'Los Angeles', 'Chicago', 'New York', 'Los Angeles'],
+    'Salary': [70000, 85000, 60000, 95000, 80000]
+}
+df = pd.DataFrame(data)
+print("\n1.2. Example DataFrame from dictionary:")
+print(df)
+
+# Creating a DataFrame with a custom index
+dates = pd.date_range('20230101', periods=5)
+df2 = pd.DataFrame(np.random.randn(5, 4), index=dates, columns=list('ABCD'))
+print("\n1.2. Example DataFrame with custom date index:")
+print(df2)
+
+# --- 2. Data Loading & Saving ---
+
+# Pandas excels at reading and writing various file formats.
+
+print("\n--- 2. Data Loading & Saving ---")
+
+# 2.1. Reading CSV files
+# Let's create a dummy CSV file for demonstration
+dummy_csv_content = """id,name,age,city,score
+1,Alice,24,New York,85
+2,Bob,27,Los Angeles,92
+3,Charlie,22,Chicago,78
+4,David,32,New York,95
+5,Eve,29,Los Angeles,88
+6,Frank,35,Houston,70
+7,Grace,21,Chicago,81
+8,Heidi,28,New York,90
+9,Ivan,30,Los Angeles,75
+10,Judy,26,Houston,83
+"""
+with open('sample_data.csv', 'w') as f:
+    f.write(dummy_csv_content)
+
+try:
+    df_csv = pd.read_csv('sample_data.csv')
+    print("\n2.1. DataFrame loaded from 'sample_data.csv':")
+    print(df_csv.head())
+except FileNotFoundError:
+    print("Please ensure 'sample_data.csv' is in the same directory.")
+
+# 2.2. Reading Excel files (requires openpyxl or xlrd)
+# pd.read_excel('file.xlsx', sheet_name='Sheet1')
+
+# 2.3. Saving to CSV
+df_csv.to_csv('output_data.csv', index=False) # index=False prevents writing the DataFrame index as a column
+print("\n2.3. DataFrame saved to 'output_data.csv'. Check your directory.")
+
+# 2.4. Saving to Excel
+# df_csv.to_excel('output_data.xlsx', index=False, sheet_name='Sheet1')
+
+# --- 3. Basic Data Inspection & Information ---
+
+# Getting a quick overview of your data.
+
+print("\n--- 3. Basic Data Inspection & Information ---")
+
+# Let's use df_csv for further examples
+print("\n3.1. Displaying the first 5 rows (head()):")
+print(df_csv.head())
+
+print("\n3.2. Displaying the last 3 rows (tail()):")
+print(df_csv.tail(3))
+
+print("\n3.3. Getting a concise summary of the DataFrame (info()):")
+df_csv.info()
+
+print("\n3.4. Getting descriptive statistics for numerical columns (describe()):")
+print(df_csv.describe())
+
+print("\n3.5. Getting the shape (rows, columns) of the DataFrame (shape):")
+print(df_csv.shape)
+
+print("\n3.6. Getting the column names (columns):")
+print(df_csv.columns)
+
+print("\n3.7. Getting the data types of each column (dtypes):")
+print(df_csv.dtypes)
+
+print("\n3.8. Counting unique values in a column (value_counts()):")
+print("\nCity counts:")
+print(df_csv['city'].value_counts())
+
+# --- 4. Data Selection & Indexing ---
+
+# Accessing specific rows, columns, or cells.
+
+print("\n--- 4. Data Selection & Indexing ---")
+
+# 4.1. Selecting a single column (returns a Series)
+print("\n4.1. Selecting 'name' column:")
+print(df_csv['name'].head())
+
+# 4.2. Selecting multiple columns (returns a DataFrame)
+print("\n4.2. Selecting 'name' and 'age' columns:")
+print(df_csv[['name', 'age']].head())
+
+# 4.3. Selecting rows by label using .loc[] (label-based indexing)
+print("\n4.3. Selecting row with index 2 using .loc[]:")
+print(df_csv.loc[2])
+
+print("\n4.3. Selecting rows from index 1 to 3 (inclusive) and specific columns using .loc[]:")
+print(df_csv.loc[1:3, ['name', 'city']])
+
+# 4.4. Selecting rows by integer position using .iloc[] (integer-location based indexing)
+print("\n4.4. Selecting row at integer position 2 using .iloc[]:")
+print(df_csv.iloc[2])
+
+print("\n4.4. Selecting rows from position 0 to 2 (exclusive) and columns at position 1 to 3 (exclusive) using .iloc[]:")
+print(df_csv.iloc[0:3, 1:4])
+
+# 4.5. Boolean indexing (filtering data)
+print("\n4.5. Filtering rows where 'age' is greater than 25:")
+print(df_csv[df_csv['age'] > 25])
+
+print("\n4.5. Filtering rows where 'city' is 'New York' AND 'score' is greater than 90:")
+print(df_csv[(df_csv['city'] == 'New York') & (df_csv['score'] > 90)])
+
+# Using .isin() for multiple conditions
+print("\n4.5. Filtering rows where 'city' is either 'New York' or 'Chicago':")
+print(df_csv[df_csv['city'].isin(['New York', 'Chicago'])])
+
+# --- 5. Data Cleaning ---
+
+# Handling missing values, duplicates, and inconsistent data.
+
+print("\n--- 5. Data Cleaning ---")
+
+# Let's create a DataFrame with missing values and duplicates
+df_dirty = pd.DataFrame({
+    'A': [1, 2, np.nan, 4, 5, 2],
+    'B': [5, np.nan, 7, 8, 9, np.nan],
+    'C': ['x', 'y', 'z', 'x', 'a', 'y']
+})
+print("\n5.0. Original Dirty DataFrame:")
+print(df_dirty)
+
+# 5.1. Checking for missing values
+print("\n5.1. Missing values per column (isnull().sum()):")
+print(df_dirty.isnull().sum())
+
+print("\n5.1. Total missing values:")
+print(df_dirty.isnull().sum().sum())
+
+# 5.2. Dropping rows with missing values
+df_cleaned_dropped = df_dirty.dropna()
+print("\n5.2. DataFrame after dropping rows with any NaN:")
+print(df_cleaned_dropped)
+
+# 5.3. Filling missing values
+df_filled_zero = df_dirty.fillna(0)
+print("\n5.3. DataFrame after filling NaNs with 0:")
+print(df_filled_zero)
+
+df_filled_mean = df_dirty['A'].fillna(df_dirty['A'].mean())
+print("\n5.3. Series 'A' after filling NaNs with its mean:")
+print(df_filled_mean)
+
+# Forward fill (ffill) and backward fill (bfill)
+df_filled_ffill = df_dirty.fillna(method='ffill')
+print("\n5.3. DataFrame after forward fill (ffill):")
+print(df_filled_ffill)
+
+# 5.4. Dropping duplicate rows
+df_duplicates = pd.DataFrame({
+    'col1': [1, 2, 2, 3, 1],
+    'col2': ['A', 'B', 'B', 'C', 'A']
+})
+print("\n5.4. Original DataFrame with duplicates:")
+print(df_duplicates)
+
+df_no_duplicates = df_duplicates.drop_duplicates()
+print("\n5.4. DataFrame after dropping duplicates:")
+print(df_no_duplicates)
+
+df_no_duplicates_subset = df_duplicates.drop_duplicates(subset=['col1']) # Keep first occurrence
+print("\n5.4. DataFrame after dropping duplicates based on 'col1':")
+print(df_no_duplicates_subset)
+
+# --- 6. Data Manipulation & Transformation ---
+
+# Renaming columns, applying functions, creating new columns.
+
+print("\n--- 6. Data Manipulation & Transformation ---")
+
+# 6.1. Renaming columns
+df_renamed = df_csv.rename(columns={'name': 'Full_Name', 'score': 'Exam_Score'})
+print("\n6.1. DataFrame after renaming columns:")
+print(df_renamed.head())
+
+# 6.2. Creating new columns
+df_csv['age_category'] = pd.cut(df_csv['age'], bins=[20, 25, 30, 35, 40],
+                                labels=['20-24', '25-29', '30-34', '35-39'])
+print("\n6.2. DataFrame with new 'age_category' column:")
+print(df_csv.head())
+
+df_csv['score_plus_10'] = df_csv['score'] + 10
+print("\n6.2. DataFrame with new 'score_plus_10' column:")
+print(df_csv.head())
+
+# 6.3. Applying functions to columns or rows
+# Using .apply() on a Series
+df_csv['city_upper'] = df_csv['city'].apply(lambda x: x.upper())
+print("\n6.3. DataFrame with 'city' column converted to uppercase using apply:")
+print(df_csv[['city', 'city_upper']].head())
+
+# Using .apply() on a DataFrame (axis=1 for row-wise, axis=0 for column-wise)
+def calculate_grade(row):
+    if row['score'] >= 90:
+        return 'A'
+    elif row['score'] >= 80:
+        return 'B'
+    elif row['score'] >= 70:
+        return 'C'
+    else:
+        return 'D'
+
+df_csv['grade'] = df_csv.apply(calculate_grade, axis=1)
+print("\n6.3. DataFrame with 'grade' column calculated using apply (row-wise):")
+print(df_csv[['name', 'score', 'grade']].head())
+
+# Using .map() for mapping values
+city_mapping = {'New York': 'NY', 'Los Angeles': 'LA', 'Chicago': 'CHI', 'Houston': 'HST'}
+df_csv['city_abbr'] = df_csv['city'].map(city_mapping)
+print("\n6.3. DataFrame with 'city_abbr' using map:")
+print(df_csv[['city', 'city_abbr']].head())
+
+# --- 7. Grouping and Aggregation ---
+
+# Summarizing data by groups (similar to SQL's GROUP BY).
+
+print("\n--- 7. Grouping and Aggregation ---")
+
+# 7.1. Grouping by a single column and calculating mean score
+print("\n7.1. Average score by city:")
+print(df_csv.groupby('city')['score'].mean())
+
+# 7.2. Grouping by multiple columns and aggregating multiple functions
+print("\n7.2. Min, Max, and Count of scores by city and age category:")
+print(df_csv.groupby(['city', 'age_category'])['score'].agg(['min', 'max', 'count']))
+
+# 7.3. Applying different aggregations to different columns
+print("\n7.3. Custom aggregations by city:")
+print(df_csv.groupby('city').agg(
+    Avg_Score=('score', 'mean'),
+    Max_Age=('age', 'max'),
+    Count_Students=('id', 'count')
+))
+
+# --- 8. Merging, Joining, and Concatenating ---
+
+# Combining DataFrames.
+
+print("\n--- 8. Merging, Joining, and Concatenating ---")
+
+# Create dummy DataFrames for merging
+df_orders = pd.DataFrame({
+    'customer_id': [1, 2, 3, 4, 1],
+    'order_id': ['A001', 'A002', 'A003', 'A004', 'A005'],
+    'amount': [100, 150, 200, 50, 120]
+})
+
+df_customers = pd.DataFrame({
+    'id': [1, 2, 3, 5], # Note: customer_id 4 is in orders but not customers, 5 is in customers but not orders
+    'customer_name': ['Alice', 'Bob', 'Charlie', 'Eve'],
+    'email': ['alice@example.com', 'bob@example.com', 'charlie@example.com', 'eve@example.com']
+})
+
+print("\n8.0. df_orders:")
+print(df_orders)
+print("\n8.0. df_customers:")
+print(df_customers)
+
+# 8.1. Merging (INNER JOIN by default)
+# Only includes keys found in BOTH DataFrames
+df_merged_inner = pd.merge(df_orders, df_customers, left_on='customer_id', right_on='id', how='inner')
+print("\n8.1. Merged (Inner Join):")
+print(df_merged_inner)
+
+# 8.2. Left Join (keep all from left, match from right)
+df_merged_left = pd.merge(df_orders, df_customers, left_on='customer_id', right_on='id', how='left')
+print("\n8.2. Merged (Left Join):")
+print(df_merged_left)
+
+# 8.3. Right Join (keep all from right, match from left)
+df_merged_right = pd.merge(df_orders, df_customers, left_on='customer_id', right_on='id', how='right')
+print("\n8.3. Merged (Right Join):")
+print(df_merged_right)
+
+# 8.4. Outer Join (keep all from both)
+df_merged_outer = pd.merge(df_orders, df_customers, left_on='customer_id', right_on='id', how='outer')
+print("\n8.4. Merged (Outer Join):")
+print(df_merged_outer)
+
+# 8.5. Concatenating DataFrames (stacking rows or columns)
+df_part1 = pd.DataFrame({'A': [1, 2], 'B': [3, 4]})
+df_part2 = pd.DataFrame({'A': [5, 6], 'B': [7, 8]})
+df_part3 = pd.DataFrame({'C': [9, 10], 'D': [11, 12]})
+
+print("\n8.5. df_part1:")
+print(df_part1)
+print("\n8.5. df_part2:")
+print(df_part2)
+print("\n8.5. df_part3:")
+print(df_part3)
+
+# Concatenate rows (axis=0, default)
+df_concat_rows = pd.concat([df_part1, df_part2])
+print("\n8.5. Concatenated rows:")
+print(df_concat_rows)
+
+# Concatenate columns (axis=1) - must have same index or specify ignore_index=True
+df_concat_cols = pd.concat([df_part1, df_part3], axis=1)
+print("\n8.5. Concatenated columns:")
+print(df_concat_cols)
+
+# --- 9. Reshaping Data (Pivot, Melt) ---
+
+# Changing the layout of your data.
+
+print("\n--- 9. Reshaping Data (Pivot, Melt) ---")
+
+# Create a sample DataFrame for reshaping
+df_sales = pd.DataFrame({
+    'Region': ['East', 'West', 'East', 'West', 'North'],
+    'Year': [2020, 2020, 2021, 2021, 2020],
+    'Sales': [100, 150, 120, 180, 90],
+    'Expenses': [30, 40, 35, 50, 25]
+})
+print("\n9.0. Original Sales DataFrame:")
+print(df_sales)
+
+# 9.1. Pivot table
+# Aggregate data by specific columns, creating new columns from unique values.
+# Similar to Excel's pivot table.
+df_pivot = df_sales.pivot_table(index='Region', columns='Year', values='Sales', aggfunc='sum')
+print("\n9.1. Pivot table (sum of sales by Region and Year):")
+print(df_pivot)
+
+# Multiple values and fill_value
+df_pivot_multi = df_sales.pivot_table(
+    index='Region',
+    columns='Year',
+    values=['Sales', 'Expenses'],
+    aggfunc='sum',
+    fill_value=0
+)
+print("\n9.1. Pivot table with multiple values and fill_value:")
+print(df_pivot_multi)
+
+
+# 9.2. Melt (unpivot)
+# Transforms columns into rows, useful for "long" format data for plotting.
+df_melted = df_sales.melt(id_vars=['Region', 'Year'],
+                         value_vars=['Sales', 'Expenses'],
+                         var_name='Metric',
+                         value_name='Value')
+print("\n9.2. Melted DataFrame (Sales and Expenses unpivoted):")
+print(df_melted)
+
+# --- 10. Time Series Data ---
+
+# Working with dates and times.
+
+print("\n--- 10. Time Series Data ---")
+
+# Create a time series DataFrame
+dates = pd.to_datetime(['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04', '2023-01-05',
+                        '2023-01-08', '2023-01-09', '2023-01-10']) # Skipped weekend
+ts_data = pd.Series(np.random.randn(len(dates)), index=dates)
+print("\n10.0. Original Time Series:")
+print(ts_data)
+
+# 10.1. Resampling time series data (e.g., daily to weekly)
+# 'W' for weekly, 'M' for monthly, 'H' for hourly
+ts_resampled_weekly_mean = ts_data.resample('W').mean()
+print("\n10.1. Resampled weekly mean:")
+print(ts_resampled_weekly_mean)
+
+# 10.2. Shifting data (e.g., for calculating daily changes)
+ts_shifted = ts_data.shift(1)
+print("\n10.2. Shifted Time Series (by 1 period):")
+print(ts_shifted)
+
+ts_daily_change = ts_data - ts_shifted
+print("\n10.2. Daily change:")
+print(ts_daily_change)
+
+# 10.3. Rolling window calculations (e.g., moving average)
+ts_rolling_mean = ts_data.rolling(window=2).mean()
+print("\n10.3. 2-period rolling mean:")
+print(ts_rolling_mean)
+
+# --- 11. Categorical Data ---
+
+# Efficiently handle categorical variables.
+
+print("\n--- 11. Categorical Data ---")
+
+df_cat = pd.DataFrame({
+    'fruit': ['apple', 'orange', 'apple', 'banana', 'orange', 'apple'],
+    'color': ['red', 'orange', 'green', 'yellow', 'orange', 'red']
+})
+print("\n11.0. Original DataFrame with potential categories:")
+print(df_cat)
+
+# 11.1. Converting to 'category' dtype
+df_cat['fruit'] = df_cat['fruit'].astype('category')
+df_cat['color'] = pd.Categorical(df_cat['color'], categories=['red', 'green', 'yellow', 'orange', 'blue'], ordered=False) # Define order
+print("\n11.1. DataFrame after converting columns to 'category' dtype:")
+print(df_cat.dtypes)
+print("\n11.1. Categories for 'color':")
+print(df_cat['color'].cat.categories)
+
+# 11.2. Operations on categorical data
+print("\n11.2. Value counts for 'fruit':")
+print(df_cat['fruit'].value_counts()) # Works like before, but more efficient for categories
+
+# Adding new categories
+df_cat['fruit'] = df_cat['fruit'].cat.add_categories('grape')
+print("\n11.2. Categories for 'fruit' after adding 'grape':")
+print(df_cat['fruit'].cat.categories)
+
+# Removing categories
+df_cat['fruit'] = df_cat['fruit'].cat.remove_categories('grape')
+print("\n11.2. Categories for 'fruit' after removing 'grape':")
+print(df_cat['fruit'].cat.categories)
+
+# --- 12. Basic Data Visualization (using pandas built-in .plot()) ---
+
+# Pandas has built-in plotting capabilities that use Matplotlib.
+
+print("\n--- 12. Basic Data Visualization ---")
+
+# Let's use the df_csv for plotting examples
+print("\n12.1. Histogram of 'age' column:")
+plt.figure(figsize=(8, 5))
+df_csv['age'].plot(kind='hist', bins=5, title='Distribution of Age')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.grid(axis='y', alpha=0.75)
+plt.show() # Display the plot
+
+print("\n12.2. Bar plot of 'city' value counts:")
+plt.figure(figsize=(8, 5))
+df_csv['city'].value_counts().plot(kind='bar', title='Number of Students by City')
+plt.xlabel('City')
+plt.ylabel('Count')
+plt.xticks(rotation=45) # Rotate x-axis labels for better readability
+plt.tight_layout() # Adjust layout to prevent labels from overlapping
+plt.show()
+
+print("\n12.3. Scatter plot of 'age' vs 'score':")
+plt.figure(figsize=(8, 5))
+df_csv.plot(kind='scatter', x='age', y='score', title='Age vs. Score', figsize=(8, 5))
+plt.xlabel('Age')
+plt.ylabel('Score')
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.show()
+
+print("\n12.4. Box plot of 'score' by 'city':")
+plt.figure(figsize=(10, 6))
+df_csv.boxplot(column='score', by='city', grid=False)
+plt.title('Score Distribution by City')
+plt.suptitle('') # Suppress the default suptitle created by boxplot
+plt.xlabel('City')
+plt.ylabel('Score')
+plt.show()
+
+# --- 13. Advanced Operations and Utilities ---
+
+print("\n--- 13. Advanced Operations and Utilities ---")
+
+# 13.1. Iterating over rows (generally avoid for large datasets due to performance)
+print("\n13.1. Iterating through rows (example - first 3):")
+for index, row in df_csv.head(3).iterrows():
+    print(f"Index: {index}, Name: {row['name']}, City: {row['city']}")
+
+# 13.2. Sampling data
+df_sample = df_csv.sample(n=3, random_state=42) # n=number of rows, random_state for reproducibility
+print("\n13.2. Random sample of 3 rows:")
+print(df_sample)
+
+df_fraction_sample = df_csv.sample(frac=0.5, random_state=42) # frac=fraction of rows
+print("\n13.2. Random sample of 50% of rows:")
+print(df_fraction_sample)
+
+# 13.3. Rank
+df_csv['score_rank'] = df_csv['score'].rank(ascending=False, method='dense')
+print("\n13.3. DataFrame with 'score_rank' (dense ranking):")
+print(df_csv[['name', 'score', 'score_rank']].sort_values(by='score'))
+
+# 13.4. Sorting values
+print("\n13.4. DataFrame sorted by 'age' (descending) and then 'score' (ascending):")
+print(df_csv.sort_values(by=['age', 'score'], ascending=[False, True]).head())
+
+# Clean up dummy CSV file
+import os
+try:
+    os.remove('sample_data.csv')
+    os.remove('output_data.csv')
+    print("\nCleaned up dummy files: sample_data.csv and output_data.csv.")
+except OSError as e:
+    print(f"Error removing dummy files: {e}")
+
