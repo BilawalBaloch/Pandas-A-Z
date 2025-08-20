@@ -865,7 +865,9 @@ A collection of other useful Pandas functions:
 
 ## 💡 How to Use
 
-Each section in the script contains runnable code blocks. You can uncomment and execute specific parts to see their output and understand the functionality. The examples are designed to be self-contained and easy to follow.
+.
+
+Each section in the script contains runnable the code blocks. You can uncomment and execute specific parts to see their output and understand the functionality. The examples are designed to be self-contained and easy to follow.
 
 This guide provides a solid foundation for your data manipulation and analysis tasks using Pandas\! Feel free to extend it with your own datasets and exploration.
 
