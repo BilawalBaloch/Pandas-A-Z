@@ -1,0 +1,449 @@
+# pandas_mastery.py
+# A comprehensive guide to Pandas for data analysis and data science.
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns # Imported for completeness, though basic plots use matplotlib directly through pandas
+
+# --- Project Setup & Configuration ---
+print("--- Initializing Pandas Mastery Project ---")
+# Configure pandas display options for better readability
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', 1000)
+pd.set_option('display.max_rows', 50)
+
+
+# --- 1. Data Generation (for self-contained examples) ---
+# We'll create a synthetic dataset to ensure the code is runnable without external files.
+print("\n--- 1. Generating Synthetic Data ---")
+np.random.seed(42) # For reproducibility
+
+data_size = 100
+dates = pd.date_range(start='2023-01-01', periods=data_size, freq='D')
+categories = ['A', 'B', 'C', 'D']
+cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix']
+
+df_data = {
+    'Date': dates,
+    'Category': np.random.choice(categories, data_size),
+    'Value_A': np.random.randint(10, 100, data_size),
+    'Value_B': np.random.rand(data_size) * 100,
+    'City': np.random.choice(cities, data_size),
+    'Rating': np.random.randint(1, 5, data_size),
+    'Comments': np.random.choice(['Good', 'Bad', 'Average', np.nan], data_size, p=[0.25, 0.25, 0.25, 0.25])
+}
+
+df = pd.DataFrame(df_data)
+
+# Introduce some missing values for demonstration
+for col in ['Value_A', 'Category', 'Rating', 'Comments']:
+    missing_indices = np.random.choice(df.index, int(data_size * 0.05), replace=False)
+    df.loc[missing_indices, col] = np.nan
+
+print("Synthetic DataFrame created (first 5 rows):")
+print(df.head())
+print(f"\nDataFrame shape: {df.shape}")
+
+# --- 2. Series Operations (1D Data Structure) ---
+print("\n--- 2. Series Operations ---")
+
+# Basic Series creation
+s1 = pd.Series([10, 20, 30, 40, 50], name='MySeries')
+print("\n2.1 Basic Series:")
+print(s1)
+
+# Series with custom index and dtype
+s2 = pd.Series([1, 2, 3, 4], index=['a', 'b', 'c', 'd'], dtype='float64', name='FloatSeries')
+print("\n2.2 Series with custom index and dtype:")
+print(s2)
+
+# Arithmetic operations with Series (demonstrating NaN alignment)
+s3 = pd.Series([100, 200, 300], index=['a', 'c', 'e'])
+print("\n2.3 Series s2 + s3 (demonstrates index alignment and NaN):")
+print(s2 + s3)
+
+# Accessing elements in Series
+print(f"\n2.4 Accessing element at index 'b' from s2: {s2['b']}")
+print(f"2.5 Accessing elements by position (first 2) from s1:\n{s1[:2]}")
+
+
+# --- 3. DataFrame Creation (2D Data Structure) ---
+print("\n--- 3. DataFrame Creation ---")
+
+# From a list of lists (explicit column names)
+df_list = pd.DataFrame([['Alice', 25, 'NY'], ['Bob', 30, 'LA']], columns=['Name', 'Age', 'City'])
+print("\n3.1 DataFrame from a list of lists:")
+print(df_list)
+
+# From a dictionary (keys become column names)
+df_dict = pd.DataFrame({
+    'Product': ['Apple', 'Banana', 'Cherry'],
+    'Price': [1.2, 0.5, 2.0],
+    'Quantity': [100, 150, 75]
+})
+print("\n3.2 DataFrame from a dictionary:")
+print(df_dict)
+
+# From a list of Series
+sr_data = {
+    'Col1': pd.Series([1, 2, 3]),
+    'Col2': pd.Series([4, 5, 6])
+}
+df_from_series = pd.DataFrame(sr_data)
+print("\n3.3 DataFrame from a dictionary of Series:")
+print(df_from_series)
+
+
+# --- 4. Basic Data Inspection & Information ---
+print("\n--- 4. Basic Data Inspection & Information ---")
+
+print("\n4.1 First 5 rows (df.head()):")
+print(df.head())
+
+print("\n4.2 Last 3 rows (df.tail(3)):")
+print(df.tail(3))
+
+print("\n4.3 DataFrame concise summary (df.info()):")
+df.info()
+
+print("\n4.4 Descriptive statistics for numerical columns (df.describe()):")
+print(df.describe())
+
+print(f"\n4.5 DataFrame shape (df.shape): {df.shape}")
+print(f"4.6 Column names (df.columns): {df.columns.tolist()}")
+print(f"4.7 Data types (df.dtypes):\n{df.dtypes}")
+
+print("\n4.8 Value counts for 'Category' column (df['Category'].value_counts()):")
+print(df['Category'].value_counts(dropna=False)) # Include NaN counts
+
+
+# --- 5. Data Selection & Indexing ---
+print("\n--- 5. Data Selection & Indexing ---")
+
+# Column selection
+print("\n5.1 Selecting a single column ('Value_A'):")
+print(df['Value_A'].head())
+
+print("\n5.2 Selecting multiple columns ('Date', 'City'):")
+print(df[['Date', 'City']].head())
+
+# Label-based indexing (.loc)
+print("\n5.3 Selecting rows 0 to 4 and columns 'City', 'Category' using .loc:")
+print(df.loc[0:4, ['City', 'Category']])
+
+print("\n5.4 Selecting specific non-contiguous rows and all columns using .loc:")
+print(df.loc[[10, 20, 30], :])
+
+# Integer-position based indexing (.iloc)
+print("\n5.5 Selecting rows at integer positions 0, 1, 2 and columns at positions 1, 3 using .iloc:")
+print(df.iloc[0:3, [1, 3]])
+
+print("\n5.6 Selecting all rows and first 2 columns using .iloc:")
+print(df.iloc[:, 0:2].head())
+
+# Boolean indexing (filtering)
+print("\n5.7 Filtering rows where 'Value_A' is greater than 80:")
+print(df[df['Value_A'] > 80].head())
+
+print("\n5.8 Filtering rows where 'Category' is 'A' AND 'Rating' is 5:")
+print(df[(df['Category'] == 'A') & (df['Rating'] == 5)].head())
+
+print("\n5.9 Filtering rows where 'City' is 'New York' OR 'Los Angeles':")
+print(df[df['City'].isin(['New York', 'Los Angeles'])].head())
+
+
+# --- 6. Data Cleaning ---
+print("\n--- 6. Data Cleaning ---")
+
+# Missing values
+print("\n6.1 Identifying missing values (df.isnull().sum()):")
+print(df.isnull().sum())
+
+# Drop missing values
+df_dropna_rows = df.dropna()
+print(f"\n6.2 DataFrame shape after dropping rows with ANY NaN (df.dropna()): {df_dropna_rows.shape}")
+
+df_dropna_cols = df.dropna(axis=1) # axis=1 for columns
+print(f"6.3 DataFrame shape after dropping columns with ANY NaN (df.dropna(axis=1)): {df_dropna_cols.shape}")
+
+# Fill missing values
+df_filled_comments = df['Comments'].fillna('No Comment').to_frame() # Fill NaN in 'Comments'
+print("\n6.4 'Comments' column after fillna('No Comment') (first 10 rows):")
+print(df_filled_comments.head(10))
+
+# Fill numerical NaNs with mean
+mean_value_a = df['Value_A'].mean()
+df_filled_mean = df.fillna({'Value_A': mean_value_a})
+print(f"\n6.5 Mean of 'Value_A' used for filling: {mean_value_a:.2f}")
+print("   'Value_A' column after filling NaNs with mean (first 10 rows):")
+print(df_filled_mean[['Value_A']].head(10))
+
+# Forward fill (ffill)
+df_ffill = df.fillna(method='ffill')
+print("\n6.6 DataFrame after forward fill (df.fillna(method='ffill')): shows how NaNs are propagated.")
+print(df_ffill.head(10)) # Observe how NaNs are filled from previous valid observation
+
+# Duplicate values
+# Create some artificial duplicates for demonstration
+df_with_duplicates = pd.concat([df, df.iloc[:5]], ignore_index=True)
+print(f"\n6.7 DataFrame with artificial duplicates added. Original shape: {df.shape}, New shape: {df_with_duplicates.shape}")
+
+print("\n6.8 Identifying duplicate rows (df_with_duplicates.duplicated().sum()):")
+print(df_with_duplicates.duplicated().sum())
+
+df_no_duplicates = df_with_duplicates.drop_duplicates()
+print(f"\n6.9 DataFrame shape after dropping duplicates (df_with_duplicates.drop_duplicates()): {df_no_duplicates.shape}")
+
+
+# --- 7. Data Manipulation & Transformation ---
+print("\n--- 7. Data Manipulation & Transformation ---")
+
+# Renaming columns
+df_renamed = df.rename(columns={'Value_A': 'Sales', 'Value_B': 'Profit'})
+print("\n7.1 DataFrame after renaming 'Value_A' to 'Sales' and 'Value_B' to 'Profit':")
+print(df_renamed.head())
+
+# Creating new columns
+df['Value_C'] = df['Value_A'] + df['Value_B']
+print("\n7.2 New column 'Value_C' created as 'Value_A' + 'Value_B':")
+print(df[['Value_A', 'Value_B', 'Value_C']].head())
+
+df['Is_High_Rating'] = df['Rating'].apply(lambda x: 'Yes' if x >= 4 else 'No')
+print("\n7.3 New column 'Is_High_Rating' created using .apply():")
+print(df[['Rating', 'Is_High_Rating']].head())
+
+# Applying functions (element-wise or row/column-wise)
+def categorize_value(val):
+    if val > 70:
+        return 'High'
+    elif val > 40:
+        return 'Medium'
+    else:
+        return 'Low'
+
+df['Value_A_Category'] = df['Value_A'].apply(categorize_value)
+print("\n7.4 New column 'Value_A_Category' using a custom function with .apply():")
+print(df[['Value_A', 'Value_A_Category']].head())
+
+# Using .map() for value substitution
+category_map = {'A': 'Group_A', 'B': 'Group_B', 'C': 'Group_C', 'D': 'Group_D'}
+df['Category_Mapped'] = df['Category'].map(category_map)
+print("\n7.5 New column 'Category_Mapped' using .map():")
+print(df[['Category', 'Category_Mapped']].head())
+
+
+# --- 8. Grouping and Aggregation ---
+print("\n--- 8. Grouping and Aggregation ---")
+
+# Group by single column and aggregate
+print("\n8.1 Average 'Value_A' by 'Category':")
+print(df.groupby('Category')['Value_A'].mean())
+
+# Group by multiple columns and aggregate multiple metrics
+print("\n8.2 Sum of 'Value_A' and mean of 'Value_B' by 'City' and 'Category':")
+grouped_df = df.groupby(['City', 'Category']).agg(
+    Total_Value_A=('Value_A', 'sum'),
+    Average_Value_B=('Value_B', 'mean'),
+    Count_Items=('Date', 'count')
+)
+print(grouped_df.head())
+
+# Using .size() to count items in each group
+print("\n8.3 Number of entries per 'City':")
+print(df.groupby('City').size())
+
+
+# --- 9. Merging, Joining, and Concatenating ---
+print("\n--- 9. Merging, Joining, and Concatenating ---")
+
+# Create two sample DataFrames for merging
+df1 = pd.DataFrame({
+    'ID': [1, 2, 3, 4],
+    'Name': ['Alice', 'Bob', 'Charlie', 'David'],
+    'Dept_ID': [101, 102, 101, 103]
+})
+
+df2 = pd.DataFrame({
+    'Dept_ID': [101, 102, 103, 104],
+    'Department': ['HR', 'IT', 'Finance', 'Marketing'],
+    'Budget': [100000, 200000, 150000, 120000]
+})
+
+print("\nSample DataFrame df1 (Employees):")
+print(df1)
+print("\nSample DataFrame df2 (Departments):")
+print(df2)
+
+# Inner Merge
+merged_inner = pd.merge(df1, df2, on='Dept_ID', how='inner')
+print("\n9.1 Inner Merge (matching Dept_ID in both):")
+print(merged_inner)
+
+# Left Merge
+merged_left = pd.merge(df1, df2, on='Dept_ID', how='left')
+print("\n9.2 Left Merge (all from df1, matching from df2):")
+print(merged_left)
+
+# Right Merge
+merged_right = pd.merge(df1, df2, on='Dept_ID', how='right')
+print("\n9.3 Right Merge (all from df2, matching from df1):")
+print(merged_right)
+
+# Outer Merge
+merged_outer = pd.merge(df1, df2, on='Dept_ID', how='outer')
+print("\n9.4 Outer Merge (all records from both, NaN where no match):")
+print(merged_outer)
+
+# Concatenating DataFrames
+df_concat1 = pd.DataFrame({'A': [1, 2], 'B': [3, 4]})
+df_concat2 = pd.DataFrame({'A': [5, 6], 'B': [7, 8]})
+df_concat_rows = pd.concat([df_concat1, df_concat2], ignore_index=True)
+print("\n9.5 Concatenating DataFrames (rows, vertical stack):")
+print(df_concat_rows)
+
+df_concat_cols = pd.concat([df_concat1, df_concat2], axis=1)
+print("\n9.6 Concatenating DataFrames (columns, horizontal stack):")
+print(df_concat_cols)
+
+
+# --- 10. Reshaping Data (Pivot, Melt) ---
+print("\n--- 10. Reshaping Data (Pivot, Melt) ---")
+
+# Create a sample DataFrame for reshaping
+df_sales = pd.DataFrame({
+    'Region': ['East', 'West', 'East', 'West', 'East'],
+    'Product': ['A', 'B', 'A', 'C', 'B'],
+    'Sales': [100, 150, 120, 80, 200]
+})
+print("\nSample DataFrame for reshaping (df_sales):")
+print(df_sales)
+
+# Pivot Table
+pivot_table_df = df_sales.pivot_table(index='Region', columns='Product', values='Sales', aggfunc='sum')
+print("\n10.1 Pivot Table (sum of sales by Region and Product):")
+print(pivot_table_df)
+
+# Melt (Unpivot)
+df_wide = pd.DataFrame({
+    'ID': [1, 2],
+    'Q1_Sales': [100, 150],
+    'Q2_Sales': [120, 180]
+})
+print("\nSample Wide DataFrame (df_wide):")
+print(df_wide)
+
+melted_df = df_wide.melt(id_vars=['ID'], var_name='Quarter', value_name='Sales')
+print("\n10.2 Melt (Unpivot) DataFrame:")
+print(melted_df)
+
+
+# --- 11. Time Series Data ---
+print("\n--- 11. Time Series Data ---")
+
+# Ensure 'Date' column is datetime type
+df['Date'] = pd.to_datetime(df['Date'])
+df_ts = df.set_index('Date').sort_index()
+
+print("\n11.1 DataFrame with 'Date' as index (first 5 rows):")
+print(df_ts.head())
+
+# Resampling (e.g., weekly sum of Value_A)
+weekly_sum = df_ts['Value_A'].resample('W').sum()
+print("\n11.2 Weekly sum of 'Value_A' (resample('W').sum()):")
+print(weekly_sum.head())
+
+# Shifting data (e.g., Value_A from previous day)
+df_ts['Value_A_Prev_Day'] = df_ts['Value_A'].shift(1)
+print("\n11.3 'Value_A_Prev_Day' column (df.shift(1)):")
+print(df_ts[['Value_A', 'Value_A_Prev_Day']].head())
+
+# Rolling window calculations (e.g., 3-day moving average of Value_A)
+df_ts['Value_A_MA_3_Days'] = df_ts['Value_A'].rolling(window=3).mean()
+print("\n11.4 3-day rolling mean of 'Value_A' (df.rolling(window=3).mean()):")
+print(df_ts[['Value_A', 'Value_A_MA_3_Days']].head(10))
+
+
+# --- 12. Categorical Data ---
+print("\n--- 12. Categorical Data ---")
+
+# Convert 'Category' to categorical dtype
+df['Category'] = df['Category'].astype('category')
+print("\n12.1 'Category' column dtype after conversion:")
+print(df['Category'].dtype)
+
+print("\n12.2 Categories and codes:")
+print(df['Category'].cat.categories)
+print(df['Category'].cat.codes.head())
+
+# Adding new categories
+df['Category'] = df['Category'].cat.add_categories('E')
+print("\n12.3 'E' added to categories:")
+print(df['Category'].cat.categories)
+
+# Removing categories (if not present in data)
+df['Category'] = df['Category'].cat.remove_unused_categories()
+print("\n12.4 Unused categories removed (if any were present):")
+print(df['Category'].cat.categories)
+
+
+# --- 13. Basic Data Visualization (using Pandas built-in plotting) ---
+print("\n--- 13. Basic Data Visualization ---")
+# Plots will open in separate windows or be displayed inline in environments like Jupyter.
+
+# Histogram of 'Value_A'
+plt.figure(figsize=(8, 5))
+df['Value_A'].plot(kind='hist', bins=10, title='Distribution of Value_A')
+plt.xlabel('Value_A')
+plt.ylabel('Frequency')
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.tight_layout()
+plt.show()
+print("13.1 Displayed a histogram of 'Value_A'.")
+
+# Bar plot of 'Category' counts
+plt.figure(figsize=(8, 5))
+df['Category'].value_counts().plot(kind='bar', title='Count of Items by Category')
+plt.xlabel('Category')
+plt.ylabel('Count')
+plt.xticks(rotation=0)
+plt.grid(axis='y', linestyle='--', alpha=0.6)
+plt.tight_layout()
+plt.show()
+print("13.2 Displayed a bar plot of 'Category' counts.")
+
+# Scatter plot of 'Value_A' vs 'Value_B'
+plt.figure(figsize=(8, 5))
+df.plot(kind='scatter', x='Value_A', y='Value_B', title='Value_A vs Value_B')
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.tight_layout()
+plt.show()
+print("13.3 Displayed a scatter plot of 'Value_A' vs 'Value_B'.")
+
+# Box plot of 'Value_A' by 'Category'
+plt.figure(figsize=(8, 5))
+df.boxplot(column='Value_A', by='Category', grid=True)
+plt.title('Value_A Distribution by Category')
+plt.suptitle('') # Suppress default suptitle
+plt.xlabel('Category')
+plt.ylabel('Value_A')
+plt.tight_layout()
+plt.show()
+print("13.4 Displayed a box plot of 'Value_A' by 'Category'.")
+
+
+# --- 14. Saving Data ---
+print("\n--- 14. Saving Data ---")
+
+# Save the processed DataFrame to a new CSV file
+output_path_csv = 'processed_data.csv'
+df.to_csv(output_path_csv, index=False) # index=False prevents writing DataFrame index as a column
+print(f"\n14.1 Processed DataFrame saved to '{output_path_csv}'.")
+
+# Save to Excel (requires openpyxl)
+# output_path_excel = 'processed_data.xlsx'
+# df.to_excel(output_path_excel, index=False)
+# print(f"14.2 Processed DataFrame saved to '{output_path_excel}'.") # Uncomment if openpyxl is installed and desired
+
+
+print("\n--- Pandas Mastery Project Completed ---")
