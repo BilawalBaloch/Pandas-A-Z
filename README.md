@@ -15,6 +15,7 @@ DataFrame (2D)
 Arithmetic Operations
 
 Data Manipulation
+Data Mantaining
 
 Inserting Data
 
